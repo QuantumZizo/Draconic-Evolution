@@ -28,6 +28,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.SimpleModelState;
+import net.minecraftforge.fml.ModList;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -68,6 +70,7 @@ public class RenderModularStaff extends ToolRenderBase {
     private final ToolPart tracePart;
     private final ToolPart bladePart;
     private final ToolPart gemPart;
+    private final static boolean isBetterCombatLoaded = ModList.get().isLoaded("bettercombat");
 
     @Nullable
     protected LivingEntity entity;
@@ -114,7 +117,8 @@ public class RenderModularStaff extends ToolRenderBase {
     //TODO want to combine the swing and equip animation somehow so the 'draw back / return' after a stab corresponds to the equip cooldown
     @Override
     public void renderTool(CCRenderState ccrs, ItemStack stack, TransformType transform, Matrix4 mat, MultiBufferSource buffers, boolean gui) {
-        float flair = 0F;
+        if (isBetterCombatLoaded == false) {
+    	float flair = 0F;
         if (entity != null && entity.getMainHandItem() == stack) {
             flair = MathHelper.interpolate(entity.oAttackAnim, entity.attackAnim, Minecraft.getInstance().getFrameTime());
             flair = MathHelper.clip(flair * 5F, 0F, 1F);
@@ -156,6 +160,7 @@ public class RenderModularStaff extends ToolRenderBase {
         mat.rotate(torad(90), Vector3.X_NEG);
         mat.translate(-0.5, 0.1, -0.5);
         effectRenderer.renderEffect(mat, buffers, mc.getFrameTime(), techLevel);
+        }
     }
 
     private void handleArmPose(ItemStack stack, TransformType transform, Matrix4 mat) {
@@ -178,6 +183,7 @@ public class RenderModularStaff extends ToolRenderBase {
     }
 
     public static void doMixinStuff(LivingEntity entity, PlayerModel<?> model) {
+    	if (isBetterCombatLoaded == false) {
         ItemStack mainHand = entity.getMainHandItem();
         ItemStack offHand = entity.getOffhandItem();
         boolean rightHanded = entity.getMainArm() == HumanoidArm.RIGHT;
@@ -197,6 +203,7 @@ public class RenderModularStaff extends ToolRenderBase {
             model.rightSleeve.copyFrom(model.rightArm);
             model.jacket.copyFrom(model.body);
         }
+    	}
     }
 
     public static void setStaffPose(LivingEntity entity, ModelPart rightArm, ModelPart leftArm, ModelPart body, ModelPart head, boolean lefthand, boolean bothHands) {
